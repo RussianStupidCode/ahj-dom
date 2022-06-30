@@ -9,7 +9,7 @@ export default class SimpleFilmList extends FilmList {
   }
 
   recreateTable(films, sortAttribute) {
-    const parent = this.el?.parentNode;
+    const parent = this.el ? this.el.parentNode : null;
 
     if (this.el) {
       this.el.remove();
