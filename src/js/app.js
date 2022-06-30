@@ -4,6 +4,8 @@ import GoblinGameField from './GoblinGameField';
 import SimpleFilmList from './SimpleFilmList';
 import { getSorted } from './utils';
 
+let currentInterval = null;
+
 const filmAttributes = ['id', 'title', 'year', 'imdb'];
 const filmListData = [
   {
@@ -41,6 +43,8 @@ const filmListData = [
 let currentAttributesIndex = 0;
 
 const stupidRefreshTable = (filmList) => {
+  currentAttributesIndex = (currentAttributesIndex + 1) % filmAttributes.length;
+
   const tableBody = filmList.el.querySelector('tbody');
   const rows = tableBody.querySelectorAll('tr');
 
@@ -54,19 +58,16 @@ const stupidRefreshTable = (filmList) => {
     newFilmListData,
     filmAttributes[currentAttributesIndex]
   );
-
-  currentAttributesIndex = (currentAttributesIndex + 1) % filmAttributes.length;
-
   return newFilmListData;
 };
 
 const refreshTable = (filmList) => {
+  currentAttributesIndex = (currentAttributesIndex + 1) % filmAttributes.length;
+
   const newFilmListData = getSorted(
     filmList.films,
     filmAttributes[currentAttributesIndex]
   );
-
-  currentAttributesIndex = (currentAttributesIndex + 1) % filmAttributes.length;
 
   return newFilmListData;
 };
@@ -101,16 +102,30 @@ function crateFilmTableControl(refreshTableCallback, taskNumber) {
   controls.insertAdjacentElement('beforeEnd', button);
 
   button.addEventListener('click', () => {
+    clearInterval(currentInterval);
+
     taskField.innerHTML = '';
     currentAttributesIndex = 0;
 
-    const filmList = new SimpleFilmList(filmListData, filmAttributes);
+    const sortedFilmListData = getSorted(
+      filmListData,
+      filmAttributes[currentAttributesIndex]
+    );
+
+    const filmList = new SimpleFilmList(
+      sortedFilmListData,
+      filmAttributes,
+      filmAttributes[currentAttributesIndex]
+    );
 
     filmList.render(taskField);
 
-    setInterval(() => {
+    currentInterval = setInterval(() => {
       const newFilmListData = refreshTableCallback(filmList);
-      filmList.recreateTable(newFilmListData);
+      filmList.recreateTable(
+        newFilmListData,
+        filmAttributes[currentAttributesIndex]
+      );
     }, 2000);
   });
 }

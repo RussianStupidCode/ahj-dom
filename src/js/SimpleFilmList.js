@@ -1,32 +1,36 @@
 import FilmList from './core/FilmsList';
 
 export default class SimpleFilmList extends FilmList {
-  constructor(films, filmAttributes) {
+  constructor(films, filmAttributes, sortAttribute) {
     super(films, filmAttributes);
-    this.el = document.createElement('table');
+    this.el = null;
 
-    this.currentSortAttribute = 0;
-
-    this.generateTable();
+    this.recreateTable(films, sortAttribute);
   }
 
-  recreateTable(films) {
-    const parent = this.el.parentNode;
+  recreateTable(films, sortAttribute) {
+    const parent = this.el?.parentNode;
+
+    if (this.el) {
+      this.el.remove();
+    }
 
     this.films = films;
-    this.el.remove();
+
     this.el = document.createElement('table');
-    this.generateTable();
+    this.generateTable(sortAttribute);
 
     if (parent) {
       this.render(parent);
     }
   }
 
-  generateTable() {
-    const headers = this.filmAttributes.map(
-      (el) => `<th class="table-cell">${el}</th>`
-    );
+  generateTable(sortAttribute) {
+    const headers = this.filmAttributes.map((el) => {
+      const head = el === sortAttribute ? `${el} ↓` : el;
+      return `<th class="table-cell">${head}</th>`;
+    });
+
     this.el.innerHTML = `
     <caption>Фильмы</caption>
     <thead><tr> ${headers.join('')}</tr></thead>
